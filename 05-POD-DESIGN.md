@@ -33,7 +33,12 @@ spec:
 kubectl get pods --selector tier=frontend
 ```
 
+Before
+
 ![](./assets/08-selectors-rs.PNG)
+
+After
+
 ![](./assets/09-selectors-svc.PNG)
 
 #### Annotations

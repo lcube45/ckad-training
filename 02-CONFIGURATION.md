@@ -3,6 +3,7 @@
 ## Configuration
 
 ![](./assets/04-variable.PNG)
+
 https://kubernetes.io/docs/tutorials/configuration/
 
 ### ConfigMap

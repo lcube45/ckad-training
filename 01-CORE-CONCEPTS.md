@@ -22,6 +22,7 @@
 
 ### Yaml
 ![](./assets/02-yaml.PNG)
+
 https://yaml.org/spec/1.2.2/
 
 ### Kubectl
