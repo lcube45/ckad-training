@@ -26,12 +26,14 @@
 |---|---|---|---|
 |Purpose|Debugging|General purpose|Debugging|
 |Community|ContainerD|ContainerD|Kubernetes|
-|Works with|ContainerD|ContainerD|All CRI Compatibler runtimes|
+|Works with|ContainerD|ContainerD|All CRI Compatible runtimes|
 
 ### Yaml
 ![](./assets/02-yaml.PNG)
 
-https://yaml.org/spec/1.2.2/
+- https://yaml.org/spec/1.2.2/
+- https://www.cs.scranton.edu/~contest/mastering_vi_editor.htm
+- https://www.linkedin.com/pulse/mastering-vi-brief-guide-well-start-desmond-kpohizoun
 
 ### Kubectl
 
@@ -41,27 +43,6 @@ Imperative vs Declarative
 kubectl create pod
 kubectl create -f pod.yaml
 ```
-
-### Commands and arguments
-
-> A container only lives as long as the process inside it is alive. If the web service inside the container is stopped or crashes the container exits.
-
-```shell
-CMD command param => CM sleep 5
-CMD["command","param"] => CM["sleep","5"]
-```
-
-> The entrypoint
-instruction is like the command instruction, as in you can specify the program that will be run when the container starts.
-
-In case of the CMD instruction the command line parameters passed will get replaced entirely, whereas in case of entrypoint the command line parameters will get appended.
-
-![](./assets/03-command.PNG)
-
-The command overrides the entrypoint instruction and the args field 
-overrides the command instruction in the Dockerfile. Remember the command field does not override the CMD instruction in the Dockerfile
-
-https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/
 
 ### K8S primitives
 
@@ -80,6 +61,8 @@ spec:
 ```
 
 #### ReplicaSet
+
+> The replicaset's selector labels must match pod template labels !
 
 ```yaml
 apiVersion: apps/v1
@@ -105,6 +88,8 @@ spec:
 ```
 
 #### Deployment
+
+> Deployment is a composite object, grouping replicaset and pod objects.
 
 ```yaml
 apiVersion: apps/v1
@@ -139,3 +124,21 @@ Namespaces are a way to divide cluster resources between multiple users.
 Namespaces are intended for use in environments with many users spread across multiple teams, or projects.
 
 It is not necessary to use multiple namespaces to separate slightly different resources, such as different versions of the same software: use labels to distinguish resources within the same namespace.
+
+Resource quota can be assigned to namespace. Feature enabled by default.
+Check if it's present ```--enable-admission-plugins=ResourceQuota```
+
+```yaml
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: my-quota
+  namespace: dev
+spec:
+  hard:
+    pods: "10"
+    requests.cpu: "4"
+    requests.memory: "5Gi"
+    limits.cpu: "10"
+    limits.memory: "10Gi"
+```

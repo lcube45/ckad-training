@@ -6,6 +6,30 @@
 
 https://kubernetes.io/docs/tutorials/configuration/
 
+### Commands and arguments
+
+> A container only lives as long as the process inside it is alive. If the web service inside the container is stopped or crashes the container exits.
+
+```shell
+CMD command param => CMD sleep 5
+CMD["command","param"] => CMD["sleep","5"]
+```
+
+> The entrypoint
+instruction is like the command instruction, as in you can specify the program that will be run when the container starts.
+
+In case of the CMD instruction the command line parameters passed will get replaced entirely, whereas in case of entrypoint the command line parameters will get appended.
+
+![](./assets/03-command.PNG)
+
+The command overrides the entrypoint instruction and the args field overrides the command instruction in the Dockerfile. Remember the command field does not override the CMD instruction in the Dockerfile
+
+https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/
+
+### Environment variables
+
+
+
 ### ConfigMap
 
 ConfigMaps are used to pass configuration data in the form of key value pairs in Kubernetes. The configMap stores configuration data in plain text.
@@ -127,7 +151,7 @@ volumes:
 
 ### Security Contexts
 
-We have learned that unlike virtual machines containers are not completely isolated from their host. Containers and the hosts share the same kernel. Containers are isolated using namespaces in Linux. The host has a namespace and the containers have their own namespace. All the processes run by the containers are in fact run on the host itself, but in their own namespaces.
+Unlike virtual machines, containers are not completely isolated from their host. Containers and the hosts share the same kernel. Containers are isolated using namespaces in Linux. The host has a namespace and the containers have their own namespace. All the processes run by the containers are in fact run on the host itself, but in their own namespaces.
 
 https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
 
@@ -138,7 +162,7 @@ docker run --cap-add MAC_ADMIN ubuntu
 docker run --privileged ubuntu
 ```
 
-For all the pod
+At the pod level
 
 https://kubernetes.io/docs/concepts/policy/pod-security-policy/
 
@@ -156,7 +180,7 @@ spec:
     command: ["sleep", "3600"]
 ```
 
-For a specific container in the pod
+At the container level
 
 ```yaml
 apiVersion: v1
@@ -171,8 +195,8 @@ spec:
 
     securityContext:
       runAsUser: 1000
-    capabilities:
-      add: ["MAC_ADMIN"]
+      capabilities:
+        add: ["MAC_ADMIN"]
 ```
 
 https://kubernetes.io/blog/2016/08/security-best-practices-kubernetes-deployment/
@@ -264,3 +288,133 @@ spec:
 ```
 
 > A container cannot use more CPU resources than its limit.  However, this is not the case with memory. A container CAN use more memory resources that its limit.
+
+- best CPU scenario: set requests but no limits
+- best RAM scenario: set requests and limits
+
+Alternative: set a **LimitRange** object at the namespace level
+
+A LimitRange is a policy to constrain the resource allocations (limits and requests) that you can specify for each applicable object kind (such as Pod or PersistentVolumeClaim) in a namespace.
+
+A LimitRange provides constraints that can:
+
+- Enforce minimum and maximum compute resources usage per Pod or Container in a namespace.
+- Enforce minimum and maximum storage request per PersistentVolumeClaim in a namespace.
+- Enforce a ratio between request and limit for a resource in a namespace.
+- Set default request/limit for compute resources in a namespace and automatically inject them to Containers at runtime.
+
+```yaml
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: cpu-resource-constraint
+spec:
+  limits:
+  - default: # this section defines default limits
+      cpu: 500m
+    defaultRequest: # this section defines default requests
+      cpu: 500m
+    max: # max and min define the limit range
+      cpu: "1"
+    min:
+      cpu: 100m
+    type: Container
+```
+**ResourceQuota**
+
+https://kubernetes.io/docs/concepts/policy/resource-quotas/
+
+```yaml
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: compute-resources
+spec:
+  hard:
+    requests.cpu: "1"
+    requests.memory: 1Gi
+    limits.cpu: "2"
+    limits.memory: 2Gi
+```
+
+### Taints and Tolerations
+
+- Taints are set on nodes
+- Tolerations are set on pods
+
+Taints and Tolerations Are only meant to restrict nodes from accepting certain pods !
+
+```sh
+kubectl taint nodes <node-name> key=value:taint-effect
+```
+
+Taints effects :
+- NoSchedule (garanteed)
+- PreferNoSchedule (not garanteed)
+- NoExecute (only for new pods and old pods get evicted)
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: web-pod
+spec:
+  containers:
+  - name: ubuntu
+    image: ubuntu
+    command: ["sleep", "3600"]
+  tolerations:
+  - key: "<key>" #from taint definition
+    operator: "Equal"
+    value: "<value>" #from taint definition
+    effect: "NoSchedule" #from taint definition
+```
+
+### Node Selectors
+
+Set labels on nodes
+
+```sh
+kubectl label nodes <node-name> <label-key>=<label-value>
+```
+
+Use labels to select Node
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: web-pod
+spec:
+  containers:
+  - name: ubuntu
+    image: ubuntu
+    command: ["sleep", "3600"]
+  nodeSelector:
+    <label-key>:<label-value>
+```
+
+### Node Affinity
+
+Ensure that pods are hosted on particular nodes.
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: web-pod
+spec:
+  containers:
+  - name: ubuntu
+    image: ubuntu
+    command: ["sleep", "3600"]
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoreDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: <label-key>
+            operator: In
+            values:
+            - <label-value>
+```
