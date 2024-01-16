@@ -14,11 +14,19 @@
 - Controller
     - Brain behind orchestration
 - Container runtime
-    - Uderlyong software to run containers
+    - Uderlying software to run containers
 - Kubelet
-    - Agent running on each node
+    - Agent running on each node of the cluster
 - Kube-proxy
     - Component in charge of networking within Kubernetes
+
+### Container runtime
+
+||ctr|nerdctl|crictl|
+|---|---|---|---|
+|Purpose|Debugging|General purpose|Debugging|
+|Community|ContainerD|ContainerD|Kubernetes|
+|Works with|ContainerD|ContainerD|All CRI Compatibler runtimes|
 
 ### Yaml
 ![](./assets/02-yaml.PNG)
