@@ -94,8 +94,7 @@ spec:
           image: nginx
 ```
 
-A rollout is the process of gradually deploying or upgrading your application containers. Whenever you create a new deployment or upgrade 
-the images in an existing deployment it triggers a Rollout.
+A rollout is the process of gradually deploying or upgrading your application containers. Whenever you create a new deployment or upgrade the images in an existing deployment it triggers a Rollout.
 
 ```sh
 kubectl rollout status deployment/myapp-deployment
