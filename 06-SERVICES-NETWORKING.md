@@ -2,6 +2,66 @@
 
 ## Services & Networking
 
+### Services
+
+Services enables communications between various components within and outside the application. Services helps us connect applications together with other applications or users.
+
+![](./assets/15-services.PNG)
+
+- NodePort
+  - The service makes an internal port accessible on a poryt of the node
+- ClusterIP
+  - The service creates a virtual IP inside the cluster to enable communication between different applications
+- LoadBalancer
+  - Provision a LoadBalancer for our application in supported cloud providers
+
+  ![](./assets/16-services.PNG)
+
+#### NodePort
+
+Expose to the outside of a cluster.
+
+A NodePort service spans across all nodes of the cluseter.
+
+![](./assets/17-NodePort.png)
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp-service
+spec:
+  type: NodePort
+  ports:
+  - targetPort: 80
+    port: 80
+    nodePort: 30008
+  selector:
+    app: myapp
+    type: frontend
+```
+
+#### ClusterIP
+
+Expose to the inside of a cluster.
+
+![](./assets/18-ClusterIP.png)
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+spec:
+  type: ClusterIP #default type
+  ports:
+  - targetPort: 80
+    port: 80
+  selector:
+    app: myapp
+    type: backend
+```
+
 ### Ingress
 
 Ingress helps your users access your application using a single Externally accessible URL, that you can configure to route to different services within your cluster based on the URL path, at the same time terminate TLS.
