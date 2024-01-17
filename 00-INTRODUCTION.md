@@ -24,6 +24,8 @@ https://github.com/dgkanatsios/CKAD-exercises
 
 https://thospfuller.com/2020/11/09/answers-to-five-kubernetes-ckad-practice-questions-2021/
 
+https://kodekloud.com/courses/kubernetes-challenges/
+
 ## Useful snippets
 
 ```sh
