@@ -68,14 +68,25 @@ Ingress helps your users access your application using a single Externally acces
 
 Simply put, think of ingress as a layer 7 load balancer built-in to the kubernetes cluster that can be configured using native kubernetes primitives just like any other object in kubernetes.
 
-K8S does not come with a ingress by default. GCE and NGINX are currently being supported and maintained by the Kubernetes project.
+**K8S does not come with a ingress by default**. GCE and NGINX are currently being supported and maintained by the Kubernetes project.
 
 https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/
 https://kubernetes.github.io/ingress-nginx/deploy/
 
 ![](./assets/11-ingress.PNG)
 
-- Ingress Controller + Ingress Resources
+
+
+#### Ingress Controller 
+
+- nginx
+- haproxy
+- traefik
+- contour
+
+![](./assets/19-Ingress-Controller.png)
+
+#### Ingress Resources
 
 ```yaml
 apiVersion: extensions/v1beta1
@@ -86,10 +97,34 @@ spec:
   rules:
   - host: wear.myonlinestore.com
     http:
-    - path: /wear
-      backend:
-        serviceName: wear-service
-        servicePort: 80
+      paths:
+      - path: /wear
+        backend:
+          serviceName: wear-service
+          servicePort: 80
+```
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-wear
+spec:
+  rules:
+  - host: wear.myonlinestore.com
+    http:
+      paths:
+      - path: /wear
+        pathType: Prefix
+        backend:
+          service:
+            name: wear-service
+            port:
+              number: 80
+```
+
+```sh
+kubectl create ingress <ingress-name> -- rule="host/path=service:port"
 ```
 
 ### Network Policies
