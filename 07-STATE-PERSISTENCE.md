@@ -37,7 +37,7 @@ A Persistent Volume is a Cluster wide pool of storage volumes configured by an A
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: pv0003
+  name: foo-pv
 spec:
   capacity:
     storage: 5Gi
@@ -46,12 +46,9 @@ spec:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Recycle
   storageClassName: slow
-  mountOptions:
-    - hard
-    - nfsvers=4.1
-  nfs:
-    path: /tmp
-    server: 172.17.0.2
+  hostPath:
+    path: "/opt/volume/nginx"
+    type: DirectoryOrCreate
 ```
 
 ### Persistent Volume Claims
@@ -70,9 +67,33 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: foo-pvc
-  namespace: foo
 spec:
   storageClassName: "" # Empty string must be explicitly set otherwise default StorageClass will be set
   volumeName: foo-pv
-  ...
+  resource:
+    requests:
+      storage: 200Mi
+  accessModes:
+    - ReadWriteMany
+```
+
+Pod using a PVC
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: logger
+spec:
+  containers:
+  - image: nginx:alpine
+    name: logger
+    volumeMounts:
+      - mountPath: "/var/www/nginx"
+        name: log-volume
+  restartPolicy: Always
+  volumes:
+    - name: log-volume
+      persistentVolumeClaim:
+        claimName: foo-pvc
 ```
